@@ -95,7 +95,7 @@ enum SettingsReader {
         }
         guard access.allows(bundleID,.settings) else {return ScanResult()}
         result.shortcuts = parse(nodes,bundleID:bundleID)
-        status(result.shortcuts.isEmpty ? "未识别到组合" : "部分读取",result.shortcuts.isEmpty ? "当前页没有可识别的已设置组合；不代表应用没有快捷键。\(instructions(bundleID))" : "仅包含当前设置页可访问的快捷键，未显示的项目和未公开的开关无法确认。\(instructions(bundleID))")
+        status(result.shortcuts.isEmpty ? "未识别到组合" : "部分读取",result.shortcuts.isEmpty ? "当前页没有可识别的已设置组合；不代表应用没有快捷键。\n\(instructions(bundleID))" : "仅包含当前设置页可访问的快捷键，未显示的项目和未公开的开关无法确认。\n\(instructions(bundleID))")
         return result
     }
 }

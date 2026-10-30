@@ -76,7 +76,7 @@ struct Shortcut: Identifiable, Codable, Hashable {
     var searchText: String {
         let keys = chord?.display ?? ""
         let aliases = keys.replacingOccurrences(of: "⌘", with: " cmd command ").replacingOccurrences(of: "⌥", with: " option alt ").replacingOccurrences(of: "⌃", with: " ctrl control ").replacingOccurrences(of: "⇧", with: " shift ")
-        return [title,source,category,keys,aliases,condition].joined(separator: " ").lowercased()
+        return [title,source,category,keys,aliases,condition,AppLanguage.english.title(self),AppLanguage.english.category(self),chord?.tokens.map {AppLanguage.english.text($0)}.joined(separator:" ") ?? ""].joined(separator: " ").lowercased()
     }
 }
 
@@ -99,7 +99,7 @@ struct ScanResult {
 enum ShortcutLogic {
     static func searchWords(_ query: String) -> [String] {
         var text = query.lowercased().replacingOccurrences(of:"+",with:" ")
-        for (key,value) in [("⌘"," cmd "),("⌥"," option "),("⌃"," ctrl "),("⇧"," shift "),("space","空格"),("截图","截屏")] {text = text.replacingOccurrences(of:key,with:value)}
+        for (key,value) in [("⌘"," cmd "),("⌥"," option "),("⌃"," ctrl "),("⇧"," shift "),("截图","截屏")] {text = text.replacingOccurrences(of:key,with:value)}
         return text.split(whereSeparator:\.isWhitespace).map(String.init)
     }
     static func duplicates(_ items: [Shortcut]) -> Set<String> {

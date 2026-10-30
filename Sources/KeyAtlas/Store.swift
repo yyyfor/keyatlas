@@ -4,6 +4,9 @@ import ApplicationServices
 import UniformTypeIdentifiers
 
 @MainActor final class ShortcutStore: ObservableObject {
+    @Published var language: AppLanguage { didSet { preferences.set(language.rawValue,forKey:"interfaceLanguage") } }
+    private let preferences: UserDefaults
+    func t(_ value: String) -> String { language.text(value) }
     @Published var shortcuts: [Shortcut] = []
     @Published var coverage: [Coverage] = []
     @Published var query = ""
@@ -29,13 +32,15 @@ import UniformTypeIdentifiers
     private var scanID: UUID?
     let storage: URL
 
-    init(storage: URL? = nil) {
+    init(storage: URL? = nil, preferences: UserDefaults = .standard) {
+        self.preferences = preferences
+        language = AppLanguage.initial(saved:preferences.string(forKey:"interfaceLanguage"))
         self.storage = storage ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/KeyAtlas")
         access = AppAccess(storage:self.storage)
         grants = access.all
         availableApps = AppReader.installedApps()
         if let message = access.loadError {self.error = message}
-        favorites = Set(UserDefaults.standard.stringArray(forKey:"favorites") ?? [])
+        favorites = Set(preferences.stringArray(forKey:"favorites") ?? [])
         let url = self.storage.appendingPathComponent("manual-shortcuts.json")
         if FileManager.default.fileExists(atPath:url.path) {
             do { manual = try JSONDecoder().decode([Shortcut].self,from:Data(contentsOf:url)) }
@@ -145,7 +150,7 @@ import UniformTypeIdentifiers
     }
     func toggleFavorite(_ item: Shortcut) {
         if favorites.contains(item.id) { favorites.remove(item.id) } else { favorites.insert(item.id) }
-        UserDefaults.standard.set(Array(favorites),forKey:"favorites")
+        preferences.set(Array(favorites),forKey:"favorites")
     }
     func saveManual(_ item: Shortcut) {
         var updated = manual; updated.append(item)
@@ -170,7 +175,7 @@ import UniformTypeIdentifiers
         } catch { self.error = "记录未保存：\(error.localizedDescription)"; return false }
     }
     func export() {
-        let panel = NSSavePanel(); panel.allowedContentTypes = [.json]; panel.nameFieldStringValue = "键览-快捷键.json"
+        let panel = NSSavePanel(); panel.allowedContentTypes = [.json]; panel.nameFieldStringValue = language == .english ? "KeyAtlas-shortcuts.json" : "键览-快捷键.json"
         guard panel.runModal() == .OK, let url = panel.url else { return }
         do {
             let encoder = JSONEncoder(); encoder.outputFormatting = [.prettyPrinted,.sortedKeys]
@@ -179,7 +184,7 @@ import UniformTypeIdentifiers
     }
     func copy(_ item: Shortcut) {
         NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString("\(item.title)  \(item.chord?.display ?? "未设置") · \(item.source)",forType:.string)
+        NSPasteboard.general.setString("\(language.title(item))  \(item.chord?.tokens.map(t).joined(separator:" ") ?? t("未设置")) · \(language.source(item))",forType:.string)
         toast = "已复制快捷键"
     }
 }

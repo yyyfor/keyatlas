@@ -9,8 +9,8 @@ import AppKit
             RootView(store:store).task {if store.lastScan == nil {store.refresh()}}
         }.defaultSize(width:1180,height:760).windowStyle(.hiddenTitleBar)
             .commands {
-                CommandGroup(replacing:.newItem) {Button("添加手动记录") {store.showAdd = true}.keyboardShortcut("n",modifiers:.command)}
-                CommandGroup(after:.newItem) {Button("刷新配置") {store.refresh()}.keyboardShortcut("r",modifiers:.command);Button("导出当前列表…") {store.export()}.keyboardShortcut("e",modifiers:[.command,.shift])}
+                CommandGroup(replacing:.newItem) {Button(store.t("添加手动记录")) {store.showAdd = true}.keyboardShortcut("n",modifiers:.command)}
+                CommandGroup(after:.newItem) {Button(store.t("刷新配置")) {store.refresh()}.keyboardShortcut("r",modifiers:.command);Button(store.t("导出当前列表…")) {store.export()}.keyboardShortcut("e",modifiers:[.command,.shift])}
             }
     }
 }
@@ -30,7 +30,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         if let i = CommandLine.arguments.firstIndex(of:"--render-preview"), CommandLine.arguments.count > i+1 {
             Task { @MainActor in
-                let store = ShortcutStore(storage:URL(fileURLWithPath:"/private/tmp/keyatlas-preview-storage"))
+                let previewDefaults = UserDefaults(suiteName:"com.local.keyatlas.preview")!
+                let store = ShortcutStore(storage:URL(fileURLWithPath:"/private/tmp/keyatlas-preview-storage"),preferences:previewDefaults)
+                if let languageIndex = CommandLine.arguments.firstIndex(of:"--language"), CommandLine.arguments.count > languageIndex+1, let language = AppLanguage(rawValue:CommandLine.arguments[languageIndex+1]) {store.language = language}
                 let system = SystemReader.scan(); let apps = AppReader.scan(access:store.access.snapshot())
                 store.shortcuts = system.shortcuts + apps.shortcuts; store.coverage = system.coverage + apps.coverage
                 store.fnAction = system.fnAction;store.dictation = system.dictation;store.functionKeys = system.functionKeys;store.lastScan = Date()
