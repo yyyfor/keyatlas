@@ -58,6 +58,46 @@ import AppKit
         let rejected = ShortcutStore(storage:blocker)
         rejected.setAccess(id:"test",name:"Test",scopes:[.preferences])
         check(rejected.grants.isEmpty && rejected.error != nil,"Failed persistence never grants access")
-        print("PASS: \(checks) persistence checks")
+        let suite = "keyatlas-language-tests-\(UUID().uuidString)"
+        let preferences = UserDefaults(suiteName:suite)!
+        defer {preferences.removePersistentDomain(forName:suite)}
+        check(AppLanguage.initial(saved:nil,preferred:["zh-Hant-TW"]) == .chinese,"Chinese system language selects Chinese on first launch")
+        check(AppLanguage.initial(saved:"invalid",preferred:["fr-FR"]) == .english,"Unsupported preference falls back to supported English")
+        check(AppLanguage.initial(saved:"en",preferred:["zh-Hans"]) == .english,"Explicit language takes precedence over system language")
+        let localized = ShortcutStore(storage:directory.appendingPathComponent("language"),preferences:preferences)
+        localized.language = .english
+        localized.setAccess(id:"test",name:"Test",scopes:[.preferences])
+        var system = record;system.id = "system.28";system.origin = .system;system.title = "将整个屏幕存储为图片";system.category = "截屏"
+        var userRecord = record;userRecord.title = "显示桌面"
+        localized.saveManual(userRecord)
+        localized.shortcuts = [system,userRecord]
+        localized.favorites = [system.id]
+        localized.filter = "已启用"
+        let stableEncoder = JSONEncoder();stableEncoder.outputFormatting = [.sortedKeys]
+        let encoded = try stableEncoder.encode(localized.shortcuts)
+        let consentBefore = localized.grants
+        check(localized.language.title(userRecord) == userRecord.title,"User-authored titles are never translated")
+        var menuRecord = userRecord;menuRecord.origin = .menu
+        check(localized.language.title(menuRecord) == menuRecord.title,"App menu labels retain their original language")
+        check(SystemReader.actions.allSatisfy {AppLanguage.english.text($0.title) != $0.title},"All known system actions have English labels")
+        localized.source = "all";localized.query = "screenshot"
+        check(localized.visible.map(\.id) == [system.id],"English action search finds the canonical system shortcut")
+        localized.query = "截屏"
+        check(localized.visible.map(\.id) == [system.id],"Chinese action search remains available in English UI")
+        localized.query = ""
+        localized.language = .chinese
+        let encodedAfter = try stableEncoder.encode(localized.shortcuts)
+        check(encodedAfter == encoded,"Language changes never rewrite shortcut data")
+        check(localized.filter == "已启用" && localized.favorites == [system.id] && localized.grants.map(\.bundleID) == consentBefore.map(\.bundleID) && localized.grants.first?.scopes == consentBefore.first?.scopes,"Language switch preserves filters, favorites and consent")
+        localized.language = .english
+        let restored = ShortcutStore(storage:localized.storage,preferences:preferences)
+        check(restored.language == .english && restored.manual == [userRecord],"Language and manual records survive relaunch independently")
+        check(AppLanguage.english.text("已读取 3 个组合，可在左侧应用来源中查看。") == "Read 3 combinations. Select the app in the sidebar to view them.","Dynamic result counts translate")
+        check(AppLanguage.english.text("记录未保存：disk full") == "Record not saved: disk full","Error translation preserves the underlying diagnostic")
+        check(AppLanguage.english.text(SettingsReader.instructions(SettingsReader.doubao)) != SettingsReader.instructions(SettingsReader.doubao),"Doubao instructions are translated")
+        let space = Shortcut(id:"space",title:"Test",source:"Test",bundleID:"test",category:"Test",chord:KeyChord(key:"空格",modifiers:["⌥"]),enabled:true,scope:"global",origin:.manual,detail:"",location:"")
+        check(ShortcutLogic.filtered([space],query:"option space",source:"all",filter:"全部",modifier:"",favorites:[]).count == 1,"English Space searches match stored Chinese key labels")
+        check(AppLanguage.english.text("收藏 显示桌面") == "Favorite 显示桌面","User text interpolated into a label is not translated")
+        print("PASS: \(checks) persistence and localization checks")
     }
 }
