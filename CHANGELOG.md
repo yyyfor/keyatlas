@@ -1,4 +1,13 @@
-# 更新记录
+# Changelog / 更新记录
+
+## 1.2.0 — 2026-10-30
+
+- Added an instant English / 简体中文 selector in the sidebar; the choice persists across launches.
+- Localized navigation, system actions, permission dialogs, read instructions, errors and key labels. User records and original app menu labels retain their wording.
+- System shortcuts are searchable in both Chinese and English. Language changes preserve saved data, favorites and per-app permissions.
+- Added an English guide and bilingual repository introduction.
+
+新增左侧栏中英文切换并记住选择；翻译系统动作、授权界面、帮助与错误提示；支持中英文系统功能搜索；保留手动记录、原应用菜单名称、收藏和授权。仓库提供中英文介绍与使用指南。
 
 ## 1.1.0 — 2026-10-30
 

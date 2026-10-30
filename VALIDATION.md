@@ -1,3 +1,20 @@
+# Validation / 验证记录 · 1.2.0
+
+2026-10-30 · Apple Silicon · macOS 15.6.1
+
+- Build succeeded. All **90 checks** passed: 59 parser/permission checks and 31 persistence/localization checks.
+- Verified language preference persistence, system-language defaults, English and Chinese search, dynamic messages, unchanged serialized shortcut data, and preserved filters, favorites and app permissions.
+- All known system actions have English labels. User-authored titles and application menu labels are preserved.
+- In the running app, switched English → 简体中文 → English and confirmed that navigation, filters, system action names, key labels and counts changed immediately.
+- Inspected the English app-access page, Raycast consent dialog and Fn help. Cancelled consent; no app or macOS Accessibility permissions were granted.
+- Rendered and inspected the overview and app-access layouts at the minimum supported width of 900 points. Final sidebar labels stay on one line.
+- Package is version 1.2.0 / build 3, Apple Silicon, macOS 14+. Ad-hoc signature verified; not Apple-notarized.
+- Existing limitation: the complete menu/settings capture path after granting KeyAtlas Accessibility access remains unverified. Parser fixtures and permission boundaries are tested; this release does not claim full shortcut coverage.
+
+中英文即时切换、偏好保存、搜索和数据稳定性均已验证，共 90 项自动检查通过。英文授权弹窗已检查并取消，未授予额外权限。安装包只包含应用，不含本机配置或诊断快照。
+
+---
+
 # 验证记录 · 1.1
 
 2026-10-30，Apple Silicon Mac / macOS 15.6.1。

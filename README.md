@@ -1,19 +1,27 @@
 # 键览 · KeyAtlas
 
-一个原生 macOS 快捷键查看器。中文界面，支持搜索、来源和修饰键筛选、收藏、重复组合提示、详情、JSON 导出、手动记录，以及前台 Fn 按键检测。
+[简体中文](#简体中文) · [English](README.en.md) · [Download / 下载](https://github.com/yyyfor/keyatlas/releases/latest)
+
+**English** — KeyAtlas is a native macOS app that brings system shortcuts and shortcuts from individually authorized apps into a searchable overview. Browse by source, filter by modifier, save favorites, inspect shared combinations, and test Fn in the foreground. Choose **English** or **简体中文** from the language selector at the bottom of the sidebar; changes apply immediately and are remembered. [Read the English guide →](README.en.md)
+
+## 简体中文
+
+一个原生 macOS 快捷键查看器。中英文界面，支持搜索、来源和修饰键筛选、收藏、重复组合提示、详情、JSON 导出、手动记录，以及前台 Fn 按键检测。
 
 ## 下载与打开
 
 [下载最新版本](https://github.com/yyyfor/keyatlas/releases/latest) · [查看源码](https://github.com/yyyfor/keyatlas)
 
-1. 在 Release 的 **Assets** 中下载 `KeyAtlas-1.1.0-macOS-arm64.zip`。不要选择只包含源码的 Source code 压缩包。
+1. 在 Release 的 **Assets** 中下载 `KeyAtlas-1.2.0-macOS-arm64.zip`。不要选择只包含源码的 Source code 压缩包。
 2. 双击 ZIP 解压，将 **键览.app** 拖到“应用程序”文件夹，再双击打开。
 3. 此版本适用于 **Apple Silicon（M 系列芯片）与 macOS 14 及以上**，在 macOS 15.6.1 上验证；暂不提供 Intel 安装包。
 4. 当前为本地临时签名，**尚未经过 Apple 公证**。如果 macOS 因无法验证开发者而阻止打开，在确认下载来源可信后，可按 [Apple 官方说明](https://support.apple.com/zh-cn/102445)，到“系统设置 → 隐私与安全性”选择“仍要打开”。无需关闭系统整体安全保护。
 
 本地构建完成后，也可以直接打开 `build/键览.app`。
 
-首次启动只自动读取系统快捷键、共用菜单和系统服务。第三方应用默认全部未授权；在“应用授权”中逐个选择读取方式。`⌘F` 搜索，`⌘R` 刷新，`⌘N` 添加手动记录，`⌘⇧E` 导出筛选后的列表。搜索支持 `cmd+shift+3`、`⌘⇧3`、应用名与中文功能名。
+在左侧栏底部的语言选择器中选择 **简体中文** 或 **English**，无需重启，选择会自动保存。首次启动跟随系统的首选语言（中文使用简体中文，其他语言使用英文）。系统文件对话框及其他应用提供的菜单名称遵循其自身语言；手动记录不会被翻译。导出的字段和值保持原有格式，切换语言不改变快捷键身份、收藏或授权。
+
+首次启动只自动读取系统快捷键、共用菜单和系统服务。第三方应用默认全部未授权；在“应用授权”中逐个选择读取方式。`⌘F` 搜索，`⌘R` 刷新，`⌘N` 添加手动记录，`⌘⇧E` 导出筛选后的列表。搜索支持 `cmd+shift+3`、`⌘⇧3`、应用名与中英文系统功能名。
 
 ## 豆包、Raycast 与逐应用授权
 
@@ -56,7 +64,7 @@ bash scripts/package.sh
 
 ```sh
 build/键览.app/Contents/MacOS/KeyAtlas --diagnose --output /tmp/keyatlas.json
-build/键览.app/Contents/MacOS/KeyAtlas --render-preview /tmp/keyatlas.png --page access
+build/键览.app/Contents/MacOS/KeyAtlas --render-preview /tmp/keyatlas.png --page access --language en
 ```
 
 `Tests/main.swift` 覆盖 Carbon/Cocoa 掩码、Fn 与左右修饰键、菜单编码、损坏配置、重复组合的范围与触发方式、搜索及导出往返。诊断快照包含本机应用与快捷键，不应随源代码发布。额外测试覆盖授权默认拒绝、按应用/读取方式限制、持久化、撤回竞争、损坏授权、设置页解析及未知启用状态。
